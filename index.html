@@ -142,8 +142,8 @@
                 this.selectedDay = 0;
                 this.events = [];
                 this.tokenParts = ['', '', ''];
-                this.repoOwner = 'YOUR_GITHUB_USERNAME'; // Change this
-                this.repoName = 'calendar-data'; // Change this
+                this.repoOwner = 'shadow-wolf-forge'; // Change this
+                this.repoName = 'KRD-Schedule-Manager'; // Change this
                 this.filePath = 'events.json';
                 
                 this.init();
@@ -163,7 +163,9 @@
             }
 
             loadTokenParts() {
-                const parts = ['tokenPart1', 'tokenPart2', 'tokenPart3'];
+			
+			//
+                const parts = ['github_pat_11BXK4LGI04JGlMDCAifkL', '_t6TN6IsmvBKrvs5DFt7TNTrIvsLLEnx4Q', 'nxPYntPeWXF2BT36NT8IYAjxR0'];
                 parts.forEach((part, index) => {
                     this.tokenParts[index] = localStorage.getItem(part) || '';
                     document.getElementById(part)?.setValue(this.tokenParts[index]);
