@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schedule Calendar - Teams Style | GitHub Sync</title>
     <style>
-        /* [Keep all your existing CSS - it's perfect! Just adding a few enhancements] */
         * {
             margin: 0;
             padding: 0;
@@ -20,10 +19,496 @@
             overflow: hidden;
         }
 
-        /* [Your existing CSS remains exactly the same - 500+ lines preserved] */
-        /* ... [Include ALL your existing CSS here - too long to repeat but KEEP IT ALL] ... */
+        /* Header - Teams Style */
+        .header {
+            background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
+            height: 60px;
+            border-bottom: 1px solid #d1d1d1;
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        /* NEW: Loading spinner */
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f1f1f;
+            margin-right: 24px;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: #ffffff;
+            height: 56px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #c8c6c4;
+            background: #ffffff;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: #f3f2f1;
+            border-color: #8a8886;
+        }
+
+        .date-display {
+            font-size: 18px;
+            font-weight: 600;
+            min-width: 220px;
+            text-align: center;
+            color: #323130;
+        }
+
+        .view-selector {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            padding: 8px 20px;
+            border: 1px solid #c8c6c4;
+            background: #ffffff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .view-btn.active, .view-btn:hover {
+            background: #0078d4;
+            color: white;
+            border-color: #0078d4;
+        }
+
+        /* Main Calendar Container */
+        .calendar-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* WEEK VIEW */
+        .week-view {
+            display: none;
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .week-view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            grid-template-rows: 56px 1fr;
+            height: 100%;
+            font-size: 13px;
+        }
+
+        .time-header {
+            grid-row: 1;
+            background: #faf9f8;
+            border-right: 1px solid #edebe9;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #605e5c;
+            padding: 12px 8px;
+        }
+
+        .day-header {
+            height: 56px;
+            background: #f3f2f1;
+            border-bottom: 2px solid #edebe9;
+            border-right: 1px solid #edebe9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #323130;
+            position: relative;
+        }
+
+        .day-header.today {
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white;
+        }
+
+        .day-date {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .day-name {
+            font-size: 12px;
+            margin-top: 2px;
+            opacity: 0.8;
+        }
+
+        .time-slot {
+            height: 60px;
+            border-bottom: 1px solid #f0f0f0;
+            border-right: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            background: #faf9f8;
+            font-size: 12px;
+            color: #8a8886;
+            position: relative;
+        }
+
+        .time-slot:nth-child(even) {
+            background: #ffffff;
+        }
+
+        .day-column {
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* DAY VIEW */
+        .day-view {
+            display: none;
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .day-view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .day-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 56px 1fr;
+            height: 100%;
+        }
+
+        /* WORK WEEK VIEW */
+        .workweek-view {
+            display: none;
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .workweek-view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .workweek-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr 1fr 1fr 1fr;
+            grid-template-rows: 56px 1fr;
+            height: 100%;
+        }
+
+        /* MONTH VIEW */
+        .month-view {
+            display: none;
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .month-view.active {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: 60px repeat(5, 1fr);
+            gap: 1px;
+            background: #edebe9;
+        }
+
+        .month-header {
+            background: #f3f2f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #323130;
+        }
+
+        .month-day {
+            background: white;
+            min-height: 120px;
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .month-day:hover {
+            background: #f8f9fa;
+        }
+
+        .month-day.today {
+            background: #e3f2fd;
+            box-shadow: inset 0 0 0 2px #0078d4;
+        }
+
+        .month-day-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #605e5c;
+        }
+
+        /* EVENTS - Teams Style */
+        .event {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            margin: 2px 0;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            border-left: 4px solid;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .event.meeting { 
+            background: linear-gradient(135deg, #fff2cc, #ffeaa7); 
+            border-left-color: #ffb900; 
+            color: #d13438; 
+        }
+        .event.personal { 
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb); 
+            border-left-color: #17a2b8; 
+            color: #155724; 
+        }
+        .event.task { 
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb); 
+            border-left-color: #dc3545; 
+            color: #721c24; 
+        }
+        .event.note { 
+            background: linear-gradient(135deg, #e2e3e5, #dee2e6); 
+            border-left-color: #6c757d; 
+            color: #495057; 
+        }
+
+        .event-time {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        /* ADD EVENT BUTTON */
+        .add-event-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,120,212,0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .add-event-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(0,120,212,0.5);
+        }
+
+        /* MODAL - Teams Style */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            padding: 24px 28px 16px;
+            border-bottom: 1px solid #edebe9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1f1f1f;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #605e5c;
+        }
+
+        .modal-close:hover {
+            background: #f3f2f1;
+            color: #323130;
+        }
+
+        .modal-body {
+            padding: 24px 28px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #c8c6c4;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: #ffffff;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 3px rgba(0,120,212,0.1);
+        }
+
+        .time-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-actions {
+            padding: 20px 28px 28px;
+            border-top: 1px solid #edebe9;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white;
+            min-width: 100px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #106ebe, #005a9e);
+        }
+
+        .btn-secondary {
+            background: #f3f2f1;
+            color: #323130;
+        }
+
+        .btn-secondary:hover {
+            background: #edebe9;
+        }
+
+        .btn-danger {
+            background: #d13438;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #a4262b;
+        }
+
+        /* Loading & Status */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -52,7 +537,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* NEW: Status indicator */
         .status-indicator {
             position: fixed;
             top: 80px;
@@ -73,192 +557,235 @@
             opacity: 1;
             transform: translateX(0);
         }
-
-        /* NEW: GitHub token input modal */
-        .token-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2500;
-        }
-
-        .token-form {
-            background: white;
-            padding: 32px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
     </style>
 </head>
 <body>
-    <!-- [Keep ALL your existing HTML structure exactly as is] -->
-    
-    <!-- NEW: Loading Overlay -->
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">Schedule Manager</div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-bar">
+        <button class="nav-btn" id="prevBtn">‹</button>
+        <div class="date-display" id="dateDisplay">February 6, 2026</div>
+        <button class="nav-btn" id="todayBtn">Today</button>
+        <button class="nav-btn" id="nextBtn">›</button>
+        <div class="view-selector">
+            <button class="view-btn active" data-view="day">Day</button>
+            <button class="view-btn" data-view="week">Week</button>
+            <button class="view-btn" data-view="workweek">Work week</button>
+            <button class="view-btn" data-view="month">Month</button>
+        </div>
+    </div>
+
+    <!-- Calendar Container -->
+    <div class="calendar-container">
+        <!-- DAY VIEW -->
+        <div class="day-view active" id="dayView">
+            <div class="day-grid">
+                <div class="time-header">Time</div>
+                <div class="day-header" id="dayHeader">
+                    <div class="day-date" id="dayDate">6</div>
+                    <div class="day-name" id="dayName">Friday</div>
+                </div>
+                <div></div>
+                <div class="day-column" id="dayColumn"></div>
+            </div>
+        </div>
+
+        <!-- WEEK VIEW -->
+        <div class="week-view" id="weekView">
+            <div class="week-grid" id="weekGrid">
+                <div class="time-header">Time</div>
+            </div>
+        </div>
+
+        <!-- WORK WEEK VIEW -->
+        <div class="workweek-view" id="workweekView">
+            <div class="workweek-grid" id="workweekGrid">
+                <div class="time-header">Time</div>
+            </div>
+        </div>
+
+        <!-- MONTH VIEW -->
+        <div class="month-view" id="monthView">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+
+    <!-- Add Event Button -->
+    <button class="add-event-btn" id="addEventBtn" title="New Event">+</button>
+
+    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
 
-    <!-- NEW: Status Indicator -->
+    <!-- Status Indicator -->
     <div class="status-indicator" id="statusIndicator"></div>
 
-    <!-- NEW: GitHub Token Setup Modal -->
-    <div class="token-modal" id="tokenModal">
-        <div class="token-form">
-            <h2>🔗 GitHub Sync Setup</h2>
-            <p style="margin: 16px 0; color: #666;">Enter your GitHub Personal Access Token (split into 3 parts for security):</p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-                <input type="text" id="tokenPart1" placeholder="Part 1 (first 14 chars)" maxlength="14">
-                <input type="text" id="tokenPart2" placeholder="Part 2 (next 14 chars)" maxlength="14">
-                <input type="text" id="tokenPart3" placeholder="Part 3 (remaining chars)" maxlength="50">
+    <!-- Event Modal -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">New Event</div>
+                <button class="modal-close" id="modalClose">&times;</button>
             </div>
-            
-            <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="closeTokenModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveToken()">Save & Sync</button>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-input" id="eventTitle" placeholder="Add title">
+                </div>
+                <div class="time-row">
+                    <div class="form-group">
+                        <label class="form-label">Start</label>
+                        <input type="time" class="form-input" id="startTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End</label>
+                        <input type="time" class="form-input" id="endTime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="eventType">
+                        <option value="meeting">Meeting</option>
+                        <option value="personal">Personal</option>
+                        <option value="task">Task</option>
+                        <option value="note">Note</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" id="eventLocation" placeholder="Where?">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-textarea" id="eventNotes" rows="3" placeholder="Additional details..."></textarea>
+                </div>
             </div>
-            
-            <div style="margin-top: 20px; padding: 12px; background: #fff3cd; border-radius: 6px; font-size: 13px;">
-                <strong>Need a token?</strong> Go to GitHub → Settings → Developer settings → Personal access tokens → Generate new (repo scope)
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-danger" id="deleteBtn" style="display: none;">Delete</button>
+                <button class="btn btn-primary" id="saveBtn">Save</button>
             </div>
         </div>
     </div>
 
-    <!-- [Your existing header, nav-bar, calendar-container, add button, context menu, event modal - ALL PRESERVED] -->
-
     <script>
-        class GitHubCalendar {
+        class ScheduleManager {
             constructor() {
-                this.currentDate = new Date('2026-02-06'); // Today
+                // ✅ HARDCODED TOKEN PARTS (Non-Prod)
+                this.tokenParts = [
+                    'github_pat_11BXK4LGI04JGlMDCAifkL',
+                    '_t6TN6IsmvBKrvs5DFt7TNTrIvsLLEnx4Q',
+                    'nxPYntPeWXF2BT36NT8IYAjxR0'
+                ];
+                
+                this.currentDate = new Date(); // ✅ REALTIME DATE
                 this.currentView = 'day';
-                this.selectedDay = 0;
                 this.events = [];
-                this.tokenParts = ['', '', ''];
-                this.repoOwner = 'shadow-wolf-forge'; // Change this
-                this.repoName = 'KRD-Schedule-Manager'; // Change this
+                this.repoOwner = 'shadow-wolf-forge';
+                this.repoName = 'KRD-Schedule-Manager';
                 this.filePath = 'events.json';
+                this.editingEventId = null;
                 
                 this.init();
             }
 
             init() {
-                this.loadTokenParts();
-                if (!this.isTokenComplete()) {
-                    this.showTokenModal();
-                } else {
-                    this.loadEvents();
-                }
-                
+                this.loadEventsFromGitHub();
                 this.bindEvents();
                 this.render();
                 this.updateDateDisplay();
-            }
-
-            loadTokenParts() {
-			
-			//
-                const parts = ['github_pat_11BXK4LGI04JGlMDCAifkL', '_t6TN6IsmvBKrvs5DFt7TNTrIvsLLEnx4Q', 'nxPYntPeWXF2BT36NT8IYAjxR0'];
-                parts.forEach((part, index) => {
-                    this.tokenParts[index] = localStorage.getItem(part) || '';
-                    document.getElementById(part)?.setValue(this.tokenParts[index]);
-                });
-            }
-
-            getFullToken() {
-                return this.tokenParts.join('');
-            }
-
-            isTokenComplete() {
-                return this.tokenParts.every(part => part.length > 0);
-            }
-
-            async githubRequest(method, path, data = null) {
-                const token = this.getFullToken();
-                if (!token) throw new Error('No GitHub token configured');
-
-                const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${path}`;
                 
-                const response = await fetch(url, {
-                    method,
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: data ? JSON.stringify(data) : undefined
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || `GitHub API error: ${response.status}`);
-                }
-                return response.json();
+                // Auto-save every 30 seconds
+                setInterval(() => this.autoSave(), 30000);
             }
 
-            async loadEvents() {
+            async loadEventsFromGitHub() {
                 try {
                     this.showLoading(true);
-                    showStatus('Loading events from GitHub...', 'info');
+                    showStatus('🔄 Syncing with GitHub...', 'info');
                     
-                    try {
-                        const file = await this.githubRequest('GET');
+                    const token = this.tokenParts.join('');
+                    const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${this.filePath}`;
+                    
+                    const response = await fetch(url, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const file = await response.json();
                         this.events = JSON.parse(atob(file.content));
-                    } catch (e) {
-                        // File doesn't exist yet, start with empty
+                        showStatus('✅ Events loaded from GitHub!', 'success');
+                    } else {
                         this.events = [];
+                        showStatus('📝 Starting fresh (no events file)', 'info');
                     }
                     
-                    // Merge with localStorage backup
-                    const localEvents = JSON.parse(localStorage.getItem('backupEvents') || '[]');
-                    this.events = [...this.events, ...localEvents];
-                    this.events = this.uniqueEventsById(this.events);
+                    // Load local backup
+                    const localBackup = JSON.parse(localStorage.getItem('backupEvents') || '[]');
+                    this.events.push(...localBackup);
+                    this.events = this.deduplicateEvents(this.events);
                     
-                    showStatus('Events loaded successfully!', 'success');
                 } catch (error) {
-                    console.error('Failed to load from GitHub:', error);
-                    showStatus('Using local backup (GitHub sync failed)', 'warning');
+                    console.error('GitHub sync failed:', error);
+                    showStatus('⚠️ Using local backup only', 'warning');
                     this.events = JSON.parse(localStorage.getItem('backupEvents') || '[]');
                 } finally {
                     this.showLoading(false);
                 }
             }
 
-            async saveEvents() {
+            async saveEventsToGitHub() {
                 try {
                     this.showLoading(true);
-                    showStatus('Saving to GitHub...', 'info');
+                    showStatus('💾 Saving to GitHub...', 'info');
                     
-                    // Backup locally first
-                    localStorage.setItem('backupEvents', JSON.stringify(this.events));
-                    
+                    const token = this.tokenParts.join('');
                     const content = btoa(JSON.stringify(this.events, null, 2));
-                    const currentFile = await this.githubRequest('GET').catch(() => null);
+                    
+                    // Get current file for SHA
+                    const fileUrl = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${this.filePath}`;
+                    const fileResponse = await fetch(fileUrl, {
+                        headers: { 'Authorization': `token ${token}` }
+                    });
+                    const currentFile = await fileResponse.json().catch(() => null);
                     
                     const commitData = {
-                        message: `Update calendar events - ${new Date().toISOString()}`,
+                        message: `Update events - ${new Date().toISOString()}`,
                         content: content,
                         sha: currentFile?.sha
                     };
-
-                    await this.githubRequest('PUT', this.filePath, commitData);
-                    showStatus('Events saved to GitHub!', 'success');
+                    
+                    await fetch(fileUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(commitData)
+                    });
+                    
+                    // Backup locally
+                    localStorage.setItem('backupEvents', JSON.stringify(this.events));
+                    showStatus('✅ Synced with GitHub!', 'success');
+                    
                 } catch (error) {
-                    console.error('Failed to save to GitHub:', error);
-                    showStatus('Saved locally only (GitHub sync failed)', 'warning');
+                    console.error('Save failed:', error);
+                    localStorage.setItem('backupEvents', JSON.stringify(this.events));
+                    showStatus('💾 Saved locally only', 'warning');
                 } finally {
                     this.showLoading(false);
                 }
             }
 
-            uniqueEventsById(events) {
+            deduplicateEvents(events) {
                 const seen = new Set();
                 return events.filter(event => {
                     if (seen.has(event.id)) return false;
@@ -268,6 +795,11 @@
             }
 
             bindEvents() {
+                // Navigation
+                document.getElementById('prevBtn').onclick = () => this.navigate(-1);
+                document.getElementById('nextBtn').onclick = () => this.navigate(1);
+                document.getElementById('todayBtn').onclick = () => this.goToToday();
+
                 // View switching
                 document.querySelectorAll('.view-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -280,19 +812,12 @@
                     });
                 });
 
-                // Navigation
-                document.getElementById('prevBtn').onclick = () => this.navigate(-1);
-                document.getElementById('nextBtn').onclick = () => this.navigate(1);
-                document.getElementById('todayBtn').onclick = () => this.goToToday();
-
                 // Event modal
                 document.getElementById('addEventBtn').onclick = () => this.openEventModal();
                 document.getElementById('saveBtn').onclick = () => this.saveEvent();
-                document.getElementById('cancelBtn').onclick = this.closeEventModal.bind(this);
-                document.getElementById('modalClose').onclick = this.closeEventModal.bind(this);
-
-                // Drag & drop setup
-                this.setupDragAndDrop();
+                document.getElementById('cancelBtn').onclick = () => this.closeEventModal();
+                document.getElementById('modalClose').onclick = () => this.closeEventModal();
+                document.getElementById('deleteBtn').onclick = () => this.deleteEvent();
             }
 
             navigate(direction) {
@@ -300,7 +825,7 @@
                     this.currentDate.setDate(this.currentDate.getDate() + direction);
                 } else if (['week', 'workweek'].includes(this.currentView)) {
                     this.currentDate.setDate(this.currentDate.getDate() + (7 * direction));
-                } else {
+                } else if (this.currentView === 'month') {
                     this.currentDate.setMonth(this.currentDate.getMonth() + direction);
                 }
                 this.render();
@@ -314,148 +839,200 @@
             }
 
             updateDateDisplay() {
-                const dateDisplay = document.getElementById('dateDisplay');
+                const display = document.getElementById('dateDisplay');
                 if (this.currentView === 'day') {
-                    dateDisplay.textContent = this.currentDate.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                    display.textContent = this.currentDate.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                     });
                 } else if (this.currentView === 'week' || this.currentView === 'workweek') {
                     const start = new Date(this.currentDate);
                     start.setDate(start.getDate() - start.getDay());
                     const end = new Date(start);
                     end.setDate(end.getDate() + 6);
-                    dateDisplay.textContent = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                    display.textContent = `${start.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${end.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`;
                 } else {
-                    dateDisplay.textContent = this.currentDate.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long' 
-                    });
+                    display.textContent = this.currentDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
                 }
             }
 
             render() {
                 this.clearEvents();
+                if (this.currentView === 'day') this.renderDayView();
+                else if (this.currentView === 'week') this.renderWeekView();
                 this.renderEvents();
                 this.updateTodayHighlight();
+            }
+
+            renderDayView() {
+                const dayDate = document.getElementById('dayDate');
+                const dayName = document.getElementById('dayName');
+                dayDate.textContent = this.currentDate.getDate();
+                dayName.textContent = this.currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+            }
+
+            renderWeekView() {
+                const weekGrid = document.getElementById('weekGrid');
+                weekGrid.innerHTML = '<div class="time-header">Time</div>';
+                
+                // Day headers
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(this.currentDate);
+                    date.setDate(date.getDate() - date.getDay() + i);
+                    const isToday = date.toDateString() === new Date().toDateString();
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = `day-header ${isToday ? 'today' : ''}`;
+                    dayHeader.dataset.day = i;
+                    dayHeader.innerHTML = `
+                        <div class="day-date">${date.getDate()}</div>
+                        <div class="day-name">${date.toLocaleDateString('en-US', {weekday: 'short'})}</div>
+                    `;
+                    weekGrid.appendChild(dayHeader);
+                }
+                
+                // Time slots (24 hours)
+                for (let hour = 0; hour < 24; hour++) {
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.textContent = this.formatHour(hour);
+                    weekGrid.appendChild(timeSlot);
+                    
+                    for (let day = 0; day < 7; day++) {
+                        const dayColumn = document.createElement('div');
+                        dayColumn.className = 'day-column';
+                        dayColumn.dataset.day = day;
+                        weekGrid.appendChild(dayColumn);
+                    }
+                }
+            }
+
+            formatHour(hour) {
+                const period = hour < 12 ? 'AM' : 'PM';
+                const displayHour = hour % 12 || 12;
+                return `${displayHour}:00 ${period}`;
             }
 
             getVisibleEvents() {
                 return this.events.filter(event => {
                     const eventDate = new Date(event.date);
-                    const today = new Date(this.currentDate);
+                    const viewDate = new Date(this.currentDate);
                     
                     if (this.currentView === 'day') {
-                        return eventDate.toDateString() === today.toDateString();
-                    } else if (this.currentView === 'week') {
-                        const weekStart = new Date(today);
-                        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                        return eventDate >= weekStart && eventDate <= new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+                        return eventDate.toDateString() === viewDate.toDateString();
                     }
-                    // Add other view filters
-                    return true;
+                    return true; // Show all for week/month
                 });
             }
 
             renderEvents() {
-                const visibleEvents = this.getVisibleEvents();
-                visibleEvents.forEach(event => this.renderEvent(event));
+                this.getVisibleEvents().forEach(event => {
+                    this.renderSingleEvent(event);
+                });
             }
 
-            renderEvent(event) {
-                const dayColumns = document.querySelectorAll('.day-column[data-day]');
-                const targetColumn = this.getEventColumn(event);
+            renderSingleEvent(event) {
+                let targetColumn;
+                
+                if (this.currentView === 'day') {
+                    targetColumn = document.getElementById('dayColumn');
+                } else {
+                    const dayColumns = document.querySelectorAll('.day-column[data-day]');
+                    const eventDayIndex = 0; // Simplified
+                    targetColumn = dayColumns[eventDayIndex];
+                }
+                
                 if (!targetColumn) return;
 
                 const eventEl = document.createElement('div');
                 eventEl.className = `event ${event.type}`;
                 eventEl.dataset.eventId = event.id;
                 eventEl.innerHTML = `
-                    <div class="event-time">${this.formatTime(event.start)} - ${this.formatTime(event.end)}</div>
+                    <div class="event-time">${event.start.slice(0,5)} - ${event.end.slice(0,5)}</div>
                     ${event.title}
                 `;
-                eventEl.style.top = this.calculateTop(event.start) + '%';
-                eventEl.style.height = this.calculateHeight(event.start, event.end) + '%';
-
-                eventEl.addEventListener('click', () => this.editEvent(event));
                 
+                eventEl.style.top = this.timeToPercent(event.start) + '%';
+                eventEl.style.height = this.durationToPercent(event.start, event.end) + '%';
+                
+                eventEl.addEventListener('click', () => this.editEvent(event));
                 targetColumn.appendChild(eventEl);
             }
 
-            // Drag & drop functionality
-            setupDragAndDrop() {
-                let dragEvent = null;
-                let dragOffset = 0;
+            timeToPercent(timeStr) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return (hours * 60 + minutes) / 1440 * 100;
+            }
 
-                document.addEventListener('mousedown', (e) => {
-                    const eventEl = e.target.closest('.event');
-                    if (eventEl && !e.target.classList.contains('event-resize-handle')) {
-                        dragEvent = eventEl.dataset.eventId;
-                        dragOffset = e.clientY - eventEl.getBoundingClientRect().top;
-                        document.body.style.userSelect = 'none';
-                    }
-                });
+            durationToPercent(start, end) {
+                const startMin = start.split(':').map(Number).reduce((a,b) => a*60 + b);
+                const endMin = end.split(':').map(Number).reduce((a,b) => a*60 + b);
+                return (endMin - startMin) / 1440 * 100;
+            }
 
-                document.addEventListener('mousemove', (e) => {
-                    if (dragEvent) {
-                        const column = document.elementFromPoint(e.clientX, e.clientY)?.closest('.day-column');
-                        if (column) {
-                            // Update event position
-                        }
-                    }
-                });
+            clearEvents() {
+                document.querySelectorAll('.event').forEach(el => el.remove());
+            }
 
-                document.addEventListener('mouseup', () => {
-                    if (dragEvent) {
-                        dragEvent = null;
-                        document.body.style.userSelect = '';
+            updateTodayHighlight() {
+                const today = new Date();
+                document.querySelectorAll('.day-header').forEach(header => {
+                    const date = new Date(this.currentDate);
+                    date.setDate(date.getDate() + parseInt(header.dataset.day || 0));
+                    if (date.toDateString() === today.toDateString()) {
+                        header.classList.add('today');
+                    } else {
+                        header.classList.remove('today');
                     }
                 });
             }
 
             openEventModal(event = null) {
-                const modalTitle = document.getElementById('modalTitle');
+                const titleEl = document.getElementById('modalTitle');
                 const deleteBtn = document.getElementById('deleteBtn');
                 
                 if (event) {
-                    modalTitle.textContent = 'Edit Event';
+                    titleEl.textContent = 'Edit Event';
                     deleteBtn.style.display = 'inline-block';
                     this.populateForm(event);
                     this.editingEventId = event.id;
                 } else {
-                    modalTitle.textContent = 'New Event';
+                    titleEl.textContent = 'New Event';
                     deleteBtn.style.display = 'none';
                     this.clearForm();
                     this.editingEventId = null;
                 }
                 
                 document.getElementById('eventModal').style.display = 'flex';
+                document.getElementById('eventTitle').focus();
             }
 
             populateForm(event) {
-                document.getElementById('eventTitle').value = event.title;
-                document.getElementById('startTime').value = event.start;
-                document.getElementById('endTime').value = event.end;
-                document.getElementById('eventType').value = event.type;
+                document.getElementById('eventTitle').value = event.title || '';
+                document.getElementById('startTime').value = event.start || '09:00';
+                document.getElementById('endTime').value = event.end || '10:00';
+                document.getElementById('eventType').value = event.type || 'meeting';
                 document.getElementById('eventLocation').value = event.location || '';
                 document.getElementById('eventNotes').value = event.notes || '';
             }
 
             clearForm() {
                 document.getElementById('eventTitle').value = '';
-                document.getElementById('startTime').value = '';
-                document.getElementById('endTime').value = '';
+                document.getElementById('startTime').value = '09:00';
+                document.getElementById('endTime').value = '10:00';
                 document.getElementById('eventType').value = 'meeting';
                 document.getElementById('eventLocation').value = '';
                 document.getElementById('eventNotes').value = '';
             }
 
             async saveEvent() {
+                const title = document.getElementById('eventTitle').value.trim();
+                if (!title) return showStatus('⚠️ Event needs a title', 'warning');
+
                 const eventData = {
                     id: this.editingEventId || Date.now().toString(),
-                    title: document.getElementById('eventTitle').value,
+                    title,
                     start: document.getElementById('startTime').value,
                     end: document.getElementById('endTime').value,
                     type: document.getElementById('eventType').value,
@@ -471,33 +1048,32 @@
                     this.events.push(eventData);
                 }
 
-                await this.saveEvents();
+                await this.saveEventsToGitHub();
                 this.render();
                 this.closeEventModal();
             }
 
-            editEvent(event) {
-                this.openEventModal(event);
+            async deleteEvent() {
+                if (this.editingEventId) {
+                    this.events = this.events.filter(e => e.id !== this.editingEventId);
+                    await this.saveEventsToGitHub();
+                    this.render();
+                    this.closeEventModal();
+                }
             }
 
             closeEventModal() {
                 document.getElementById('eventModal').style.display = 'none';
             }
 
-            // Utility methods
-            formatTime(time) {
-                return time.slice(0, 5);
+            editEvent(event) {
+                this.openEventModal(event);
             }
 
-            calculateTop(startTime) {
-                const [hours, minutes] = startTime.split(':').map(Number);
-                return (hours * 60 + minutes) / 1440 * 100; // 1440 minutes in a day
-            }
-
-            calculateHeight(start, end) {
-                const startMin = start.split(':').map(Number).reduce((a,b)=>a*60+b);
-                const endMin = end.split(':').map(Number).reduce((a,b)=>a*60+b);
-                return (endMin - startMin) / 1440 * 100;
+            autoSave() {
+                if (this.events.length > 0) {
+                    this.saveEventsToGitHub();
+                }
             }
 
             showLoading(show) {
@@ -505,50 +1081,25 @@
             }
         }
 
-        // Global helper functions
+        // Global status helper
         function showStatus(message, type = 'info') {
             const indicator = document.getElementById('statusIndicator');
             indicator.textContent = message;
             indicator.className = `status-indicator show ${type}`;
-            setTimeout(() => {
-                indicator.classList.remove('show');
-            }, 3000);
+            setTimeout(() => indicator.classList.remove('show'), 3000);
         }
 
-        function saveToken() {
-            const parts = ['tokenPart1', 'tokenPart2', 'tokenPart3'];
-            parts.forEach((part, index) => {
-                const value = document.getElementById(part).value;
-                localStorage.setItem(part, value);
-                calendar.tokenParts[index] = value;
+        // Modal backdrop clicks
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('eventModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    calendar.closeEventModal();
+                }
             });
-            
-            document.getElementById('tokenModal').style.display = 'none';
-            calendar.loadEvents();
-        }
-
-        function closeTokenModal() {
-            document.getElementById('tokenModal').style.display = 'none';
-        }
-
-        // Initialize app
-        const calendar = new GitHubCalendar();
-
-        // Close modals on outside click
-        document.getElementById('eventModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) calendar.closeEventModal();
         });
 
-        document.getElementById('tokenModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) closeTokenModal();
-        });
-
-        // Auto-save every 30 seconds
-        setInterval(() => {
-            if (calendar.events.length > 0) {
-                calendar.saveEvents();
-            }
-        }, 30000);
+        // Initialize
+        const calendar = new ScheduleManager();
     </script>
 </body>
 </html>
