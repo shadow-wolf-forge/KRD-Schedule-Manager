@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "1770365171802",
+    "title": "Test1",
+    "start": "09:00",
+    "end": "10:00",
+    "type": "meeting",
+    "location": "",
+    "notes": "Knack",
+    "date": "2026-02-06"
+  }
+]
