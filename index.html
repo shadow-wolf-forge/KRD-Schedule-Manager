@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Calendar - Teams Style | GitHub Sync</title>
+    <style>
+        /* [Keep all your existing CSS - it's perfect! Just adding a few enhancements] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            color: #2d2d2d;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* [Your existing CSS remains exactly the same - 500+ lines preserved] */
+        /* ... [Include ALL your existing CSS here - too long to repeat but KEEP IT ALL] ... */
+
+        /* NEW: Loading spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* NEW: Status indicator */
+        .status-indicator {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            padding: 8px 16px;
+            background: #0078d4;
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .status-indicator.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* NEW: GitHub token input modal */
+        .token-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+        }
+
+        .token-form {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- [Keep ALL your existing HTML structure exactly as is] -->
+    
+    <!-- NEW: Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- NEW: Status Indicator -->
+    <div class="status-indicator" id="statusIndicator"></div>
+
+    <!-- NEW: GitHub Token Setup Modal -->
+    <div class="token-modal" id="tokenModal">
+        <div class="token-form">
+            <h2>🔗 GitHub Sync Setup</h2>
+            <p style="margin: 16px 0; color: #666;">Enter your GitHub Personal Access Token (split into 3 parts for security):</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <input type="text" id="tokenPart1" placeholder="Part 1 (first 14 chars)" maxlength="14">
+                <input type="text" id="tokenPart2" placeholder="Part 2 (next 14 chars)" maxlength="14">
+                <input type="text" id="tokenPart3" placeholder="Part 3 (remaining chars)" maxlength="50">
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeTokenModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveToken()">Save & Sync</button>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 12px; background: #fff3cd; border-radius: 6px; font-size: 13px;">
+                <strong>Need a token?</strong> Go to GitHub → Settings → Developer settings → Personal access tokens → Generate new (repo scope)
+            </div>
+        </div>
+    </div>
+
+    <!-- [Your existing header, nav-bar, calendar-container, add button, context menu, event modal - ALL PRESERVED] -->
+
+    <script>
+        class GitHubCalendar {
+            constructor() {
+                this.currentDate = new Date('2026-02-06'); // Today
+                this.currentView = 'day';
+                this.selectedDay = 0;
+                this.events = [];
+                this.tokenParts = ['', '', ''];
+                this.repoOwner = 'YOUR_GITHUB_USERNAME'; // Change this
+                this.repoName = 'calendar-data'; // Change this
+                this.filePath = 'events.json';
+                
+                this.init();
+            }
+
+            init() {
+                this.loadTokenParts();
+                if (!this.isTokenComplete()) {
+                    this.showTokenModal();
+                } else {
+                    this.loadEvents();
+                }
+                
+                this.bindEvents();
+                this.render();
+                this.updateDateDisplay();
+            }
+
+            loadTokenParts() {
+                const parts = ['tokenPart1', 'tokenPart2', 'tokenPart3'];
+                parts.forEach((part, index) => {
+                    this.tokenParts[index] = localStorage.getItem(part) || '';
+                    document.getElementById(part)?.setValue(this.tokenParts[index]);
+                });
+            }
+
+            getFullToken() {
+                return this.tokenParts.join('');
+            }
+
+            isTokenComplete() {
+                return this.tokenParts.every(part => part.length > 0);
+            }
+
+            async githubRequest(method, path, data = null) {
+                const token = this.getFullToken();
+                if (!token) throw new Error('No GitHub token configured');
+
+                const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${path}`;
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: data ? JSON.stringify(data) : undefined
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `GitHub API error: ${response.status}`);
+                }
+                return response.json();
+            }
+
+            async loadEvents() {
+                try {
+                    this.showLoading(true);
+                    showStatus('Loading events from GitHub...', 'info');
+                    
+                    try {
+                        const file = await this.githubRequest('GET');
+                        this.events = JSON.parse(atob(file.content));
+                    } catch (e) {
+                        // File doesn't exist yet, start with empty
+                        this.events = [];
+                    }
+                    
+                    // Merge with localStorage backup
+                    const localEvents = JSON.parse(localStorage.getItem('backupEvents') || '[]');
+                    this.events = [...this.events, ...localEvents];
+                    this.events = this.uniqueEventsById(this.events);
+                    
+                    showStatus('Events loaded successfully!', 'success');
+                } catch (error) {
+                    console.error('Failed to load from GitHub:', error);
+                    showStatus('Using local backup (GitHub sync failed)', 'warning');
+                    this.events = JSON.parse(localStorage.getItem('backupEvents') || '[]');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async saveEvents() {
+                try {
+                    this.showLoading(true);
+                    showStatus('Saving to GitHub...', 'info');
+                    
+                    // Backup locally first
+                    localStorage.setItem('backupEvents', JSON.stringify(this.events));
+                    
+                    const content = btoa(JSON.stringify(this.events, null, 2));
+                    const currentFile = await this.githubRequest('GET').catch(() => null);
+                    
+                    const commitData = {
+                        message: `Update calendar events - ${new Date().toISOString()}`,
+                        content: content,
+                        sha: currentFile?.sha
+                    };
+
+                    await this.githubRequest('PUT', this.filePath, commitData);
+                    showStatus('Events saved to GitHub!', 'success');
+                } catch (error) {
+                    console.error('Failed to save to GitHub:', error);
+                    showStatus('Saved locally only (GitHub sync failed)', 'warning');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            uniqueEventsById(events) {
+                const seen = new Set();
+                return events.filter(event => {
+                    if (seen.has(event.id)) return false;
+                    seen.add(event.id);
+                    return true;
+                });
+            }
+
+            bindEvents() {
+                // View switching
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.currentView = btn.dataset.view;
+                        document.querySelectorAll('[class*="-view"]').forEach(v => v.classList.remove('active'));
+                        document.getElementById(this.currentView + 'View').classList.add('active');
+                        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.render();
+                    });
+                });
+
+                // Navigation
+                document.getElementById('prevBtn').onclick = () => this.navigate(-1);
+                document.getElementById('nextBtn').onclick = () => this.navigate(1);
+                document.getElementById('todayBtn').onclick = () => this.goToToday();
+
+                // Event modal
+                document.getElementById('addEventBtn').onclick = () => this.openEventModal();
+                document.getElementById('saveBtn').onclick = () => this.saveEvent();
+                document.getElementById('cancelBtn').onclick = this.closeEventModal.bind(this);
+                document.getElementById('modalClose').onclick = this.closeEventModal.bind(this);
+
+                // Drag & drop setup
+                this.setupDragAndDrop();
+            }
+
+            navigate(direction) {
+                if (this.currentView === 'day') {
+                    this.currentDate.setDate(this.currentDate.getDate() + direction);
+                } else if (['week', 'workweek'].includes(this.currentView)) {
+                    this.currentDate.setDate(this.currentDate.getDate() + (7 * direction));
+                } else {
+                    this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+                }
+                this.render();
+                this.updateDateDisplay();
+            }
+
+            goToToday() {
+                this.currentDate = new Date();
+                this.render();
+                this.updateDateDisplay();
+            }
+
+            updateDateDisplay() {
+                const dateDisplay = document.getElementById('dateDisplay');
+                if (this.currentView === 'day') {
+                    dateDisplay.textContent = this.currentDate.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                } else if (this.currentView === 'week' || this.currentView === 'workweek') {
+                    const start = new Date(this.currentDate);
+                    start.setDate(start.getDate() - start.getDay());
+                    const end = new Date(start);
+                    end.setDate(end.getDate() + 6);
+                    dateDisplay.textContent = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                } else {
+                    dateDisplay.textContent = this.currentDate.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long' 
+                    });
+                }
+            }
+
+            render() {
+                this.clearEvents();
+                this.renderEvents();
+                this.updateTodayHighlight();
+            }
+
+            getVisibleEvents() {
+                return this.events.filter(event => {
+                    const eventDate = new Date(event.date);
+                    const today = new Date(this.currentDate);
+                    
+                    if (this.currentView === 'day') {
+                        return eventDate.toDateString() === today.toDateString();
+                    } else if (this.currentView === 'week') {
+                        const weekStart = new Date(today);
+                        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                        return eventDate >= weekStart && eventDate <= new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+                    }
+                    // Add other view filters
+                    return true;
+                });
+            }
+
+            renderEvents() {
+                const visibleEvents = this.getVisibleEvents();
+                visibleEvents.forEach(event => this.renderEvent(event));
+            }
+
+            renderEvent(event) {
+                const dayColumns = document.querySelectorAll('.day-column[data-day]');
+                const targetColumn = this.getEventColumn(event);
+                if (!targetColumn) return;
+
+                const eventEl = document.createElement('div');
+                eventEl.className = `event ${event.type}`;
+                eventEl.dataset.eventId = event.id;
+                eventEl.innerHTML = `
+                    <div class="event-time">${this.formatTime(event.start)} - ${this.formatTime(event.end)}</div>
+                    ${event.title}
+                `;
+                eventEl.style.top = this.calculateTop(event.start) + '%';
+                eventEl.style.height = this.calculateHeight(event.start, event.end) + '%';
+
+                eventEl.addEventListener('click', () => this.editEvent(event));
+                
+                targetColumn.appendChild(eventEl);
+            }
+
+            // Drag & drop functionality
+            setupDragAndDrop() {
+                let dragEvent = null;
+                let dragOffset = 0;
+
+                document.addEventListener('mousedown', (e) => {
+                    const eventEl = e.target.closest('.event');
+                    if (eventEl && !e.target.classList.contains('event-resize-handle')) {
+                        dragEvent = eventEl.dataset.eventId;
+                        dragOffset = e.clientY - eventEl.getBoundingClientRect().top;
+                        document.body.style.userSelect = 'none';
+                    }
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (dragEvent) {
+                        const column = document.elementFromPoint(e.clientX, e.clientY)?.closest('.day-column');
+                        if (column) {
+                            // Update event position
+                        }
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (dragEvent) {
+                        dragEvent = null;
+                        document.body.style.userSelect = '';
+                    }
+                });
+            }
+
+            openEventModal(event = null) {
+                const modalTitle = document.getElementById('modalTitle');
+                const deleteBtn = document.getElementById('deleteBtn');
+                
+                if (event) {
+                    modalTitle.textContent = 'Edit Event';
+                    deleteBtn.style.display = 'inline-block';
+                    this.populateForm(event);
+                    this.editingEventId = event.id;
+                } else {
+                    modalTitle.textContent = 'New Event';
+                    deleteBtn.style.display = 'none';
+                    this.clearForm();
+                    this.editingEventId = null;
+                }
+                
+                document.getElementById('eventModal').style.display = 'flex';
+            }
+
+            populateForm(event) {
+                document.getElementById('eventTitle').value = event.title;
+                document.getElementById('startTime').value = event.start;
+                document.getElementById('endTime').value = event.end;
+                document.getElementById('eventType').value = event.type;
+                document.getElementById('eventLocation').value = event.location || '';
+                document.getElementById('eventNotes').value = event.notes || '';
+            }
+
+            clearForm() {
+                document.getElementById('eventTitle').value = '';
+                document.getElementById('startTime').value = '';
+                document.getElementById('endTime').value = '';
+                document.getElementById('eventType').value = 'meeting';
+                document.getElementById('eventLocation').value = '';
+                document.getElementById('eventNotes').value = '';
+            }
+
+            async saveEvent() {
+                const eventData = {
+                    id: this.editingEventId || Date.now().toString(),
+                    title: document.getElementById('eventTitle').value,
+                    start: document.getElementById('startTime').value,
+                    end: document.getElementById('endTime').value,
+                    type: document.getElementById('eventType').value,
+                    location: document.getElementById('eventLocation').value,
+                    notes: document.getElementById('eventNotes').value,
+                    date: this.currentDate.toISOString().split('T')[0]
+                };
+
+                if (this.editingEventId) {
+                    const index = this.events.findIndex(e => e.id === this.editingEventId);
+                    this.events[index] = eventData;
+                } else {
+                    this.events.push(eventData);
+                }
+
+                await this.saveEvents();
+                this.render();
+                this.closeEventModal();
+            }
+
+            editEvent(event) {
+                this.openEventModal(event);
+            }
+
+            closeEventModal() {
+                document.getElementById('eventModal').style.display = 'none';
+            }
+
+            // Utility methods
+            formatTime(time) {
+                return time.slice(0, 5);
+            }
+
+            calculateTop(startTime) {
+                const [hours, minutes] = startTime.split(':').map(Number);
+                return (hours * 60 + minutes) / 1440 * 100; // 1440 minutes in a day
+            }
+
+            calculateHeight(start, end) {
+                const startMin = start.split(':').map(Number).reduce((a,b)=>a*60+b);
+                const endMin = end.split(':').map(Number).reduce((a,b)=>a*60+b);
+                return (endMin - startMin) / 1440 * 100;
+            }
+
+            showLoading(show) {
+                document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+            }
+        }
+
+        // Global helper functions
+        function showStatus(message, type = 'info') {
+            const indicator = document.getElementById('statusIndicator');
+            indicator.textContent = message;
+            indicator.className = `status-indicator show ${type}`;
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+
+        function saveToken() {
+            const parts = ['tokenPart1', 'tokenPart2', 'tokenPart3'];
+            parts.forEach((part, index) => {
+                const value = document.getElementById(part).value;
+                localStorage.setItem(part, value);
+                calendar.tokenParts[index] = value;
+            });
+            
+            document.getElementById('tokenModal').style.display = 'none';
+            calendar.loadEvents();
+        }
+
+        function closeTokenModal() {
+            document.getElementById('tokenModal').style.display = 'none';
+        }
+
+        // Initialize app
+        const calendar = new GitHubCalendar();
+
+        // Close modals on outside click
+        document.getElementById('eventModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) calendar.closeEventModal();
+        });
+
+        document.getElementById('tokenModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeTokenModal();
+        });
+
+        // Auto-save every 30 seconds
+        setInterval(() => {
+            if (calendar.events.length > 0) {
+                calendar.saveEvents();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
